@@ -1,0 +1,15 @@
+^renv$
+^man-roxygen$
+man-roxygenbbb
+^renv\.lock$
+^.*\.Rproj$
+^\.Rproj\.user$
+extras
+^\.Rprofile$
+documents
+readme.md
+.github
+^_pkgdown.yml
+^compare_versions
+^deploy.sh
+^docs

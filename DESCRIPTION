@@ -1,0 +1,45 @@
+Package: DrugAdherence
+Type: Package
+Title: DrugAdherence: To learn patterns of Medication Compliance, Aderence and Persistence
+Version: 0.0.1
+Date: 2025-05-19
+Authors@R: c(
+    person("Gowtham", "Rao", email = "rao@ohdsi.org", role = c("aut", "cre")),
+    person("Observational Health Data Science and Informatics", role = c("cph"))
+  )
+Maintainer: Gowtham Rao <rao@ohdsi.org>
+Description: The DrugAdherence R package analyzes medication compliance and persistence in cohorts. It assesses drug utilization from first exposure, calculates key metrics like medication possession ratio and proportional days covered, and enhances insights into real-world adherence to improve patient outcomes.
+Depends:
+	DatabaseConnector (>= 5.0.0),
+	R (>= 4.1.0)
+Imports:
+    checkmate,
+    CirceR,
+    dplyr,
+    fabletools,
+    feasts,
+    FeatureExtraction,
+    ggplot2,
+    hrbrthemes,
+    viridis,
+    lifecycle,
+    rlang,
+    SqlRender,
+    tidyr,
+    tsibble
+Suggests:
+  Eunomia,
+  remotes,
+  rmarkdown,
+  RJSONIO,
+	testthat,
+	withr
+Remotes:
+  CirceR
+License: Apache License
+RoxygenNote: 7.3.2
+Roxygen: list(markdown = TRUE)
+Encoding: UTF-8
+Language: en-US
+URL: https://ohdsi.github.io/DrugAdherence/, https://github.com/OHDSI/DrugAdherence
+BugReports: https://github.com/OHDSI/DrugAdherence/issues
