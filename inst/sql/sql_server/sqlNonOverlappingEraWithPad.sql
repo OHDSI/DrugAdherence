@@ -13,11 +13,11 @@ FROM
   SELECT
     @person_id_col subject_id,
 	min(@start_date_col) AS cohort_start_date,
-	DATEADD(day, - 1 * @era_constructor_pad, max(era_end_date)) AS cohort_end_date
+	DATEADD(day, - 1 * @era_constructor_pad, max(@era_end_date_col)) AS cohort_end_date
   FROM (
 	SELECT @person_id_col,
 		@start_date_col,
-		era_end_date,
+		@era_end_date_col,
   		sum(is_start) OVER (
 			PARTITION BY @person_id_col ORDER BY @start_date_col,
   				is_start DESC rows unbounded preceding
@@ -25,9 +25,9 @@ FROM
   	FROM (
 		SELECT @person_id_col,
 			@start_date_col,
-			era_end_date,
+			@era_end_date_col,
 			CASE
-				WHEN max(era_end_date) OVER (
+				WHEN max(@era_end_date_col) OVER (
 						PARTITION BY @person_id_col ORDER BY @start_date_col rows BETWEEN unbounded preceding
   								AND 1 preceding
 						) >= @start_date_col
@@ -37,7 +37,7 @@ FROM
   		FROM (
 			SELECT @person_id_col,
 				@start_date_col,
-				DATEADD(day, @era_constructor_pad, @end_date_col) AS era_end_date
+				DATEADD(day, @era_constructor_pad, @end_date_col) AS @era_end_date_col
   			FROM @source_table
   			) CR
   		) ST
