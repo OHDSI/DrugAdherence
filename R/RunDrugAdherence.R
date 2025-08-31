@@ -478,7 +478,7 @@ runDrugAdherence <- function(connectionDetails = NULL,
     dplyr::summarize(
       persons = n_distinct(.data$subjectId),
       events = n(),
-      days = as.double(sum(.data$cohortEndDate - .data$cohortStartDate + 1))
+      days = sum(as.numeric(.data$cohortEndDate - .data$cohortStartDate, units = "days") + 1)
     ) |>
     dplyr::rename(cohortId = .data$cohortDefinitionId) |>
     dplyr::inner_join(
@@ -607,7 +607,7 @@ runDrugAdherence <- function(connectionDetails = NULL,
       .data$cohortDefinitionId,
       .data$subjectId
     ) |>
-    dplyr::summarise(days = sum(.data$cohortEndDate - .data$cohortStartDate + 1) |> as.double(), .groups = "drop") |>
+    dplyr::summarise(days = sum(as.numeric(.data$cohortEndDate - .data$cohortStartDate, units = "days") + 1) |> as.double(), .groups = "drop") |>
     dplyr::ungroup() |>
     dplyr::select(
       .data$cohortDefinitionId,
