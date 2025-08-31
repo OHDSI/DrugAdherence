@@ -349,8 +349,8 @@ runDrugAdherence <- function(connectionDetails = NULL,
     dplyr::mutate(cohortDefinitionId = 1) |>
     dplyr::rename(
       subjectId = .data$personId,
-      cohortStartDate = .data$DrugAdherenceStartDate,
-      cohortEndDate = .data$DrugAdherenceEndDate
+      cohortStartDate = .data$drugExposureStartDate,
+      cohortEndDate = .data$drugExposureEndDate
     ) |>
     dplyr::select(
       .data$cohortDefinitionId,
@@ -369,11 +369,11 @@ runDrugAdherence <- function(connectionDetails = NULL,
   DrugAdherenceCohort2 <- output$DrugAdherenceDays |>
     dplyr::mutate(
       cohortDefinitionId = 2,
-      DrugAdherenceEndDate = .data$DrugAdherenceStartDate + .data$daysSupply
+      DrugAdherenceEndDate = .data$drugExposureStartDate + .data$daysSupply
     ) |>
     dplyr::rename(
       subjectId = .data$personId,
-      cohortStartDate = .data$DrugAdherenceStartDate,
+      cohortStartDate = .data$drugExposureStartDate,
       cohortEndDate = .data$DrugAdherenceEndDate
     ) |>
     dplyr::select(
