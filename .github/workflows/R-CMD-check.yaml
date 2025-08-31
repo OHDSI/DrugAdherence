@@ -3,10 +3,12 @@
 on:
   push:
     branches:
-      - '**'
+      - main
+      - develop
   pull_request:
     branches:
-      - '**'
+      - main
+      - develop
 
 name: R-CMD-check
 
@@ -23,6 +25,8 @@ jobs:
           - {os: windows-latest, r: 'release'}
           - {os: macOS-latest, r: 'release'}
           - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-latest, r: 'devel', http-user-agent: 'R-devel'}
+          - {os: ubuntu-latest, r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GH_TOKEN }}
@@ -51,17 +55,18 @@ jobs:
       CDM5_SPARK_USER: ${{ secrets.CDM5_SPARK_USER }}
       CDM5_SPARK_PASSWORD: ${{ secrets.CDM5_SPARK_PASSWORD }}
       CDM5_SPARK_CONNECTION_STRING: ${{ secrets.CDM5_SPARK_CONNECTION_STRING }}
+      R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
-
-      - uses: r-lib/actions/setup-tinytex@v2
-
-      - uses: r-lib/actions/setup-pandoc@v2
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
 
       - name: Install system requirements
         if: runner.os == 'Linux'
@@ -83,6 +88,7 @@ jobs:
           args: 'c("--no-manual", "--as-cran")'
           error-on: '"warning"'
           check-dir: '"check"'
+          upload-snapshots: true
 
       - name: Upload source package
         if: success() && runner.os == 'macOS' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -103,7 +109,7 @@ jobs:
         shell: Rscript {0}
 
   Release:
-    needs: R-CMD-Check
+    needs: R-CMD-check
 
     runs-on: macOS-latest
 
@@ -114,7 +120,7 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -169,4 +175,3 @@ jobs:
         if: ${{ env.new_version != '' }}
         run: |
           curl --data "build=true" -X POST https://registry.hub.docker.com/u/ohdsi/broadsea-methodslibrary/trigger/f0b51cec-4027-4781-9383-4b38b42dd4f5/
-
