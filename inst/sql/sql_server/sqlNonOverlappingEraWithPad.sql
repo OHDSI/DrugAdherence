@@ -11,38 +11,38 @@ SELECT {@cohort_definition_id_not_null} ? {CAST(@cohort_definition_id AS BIGINT)
 FROM
 (
   SELECT 
-    @person_id subject_id,
-  	min(@start_date) AS cohort_start_date,
-  	DATEADD(day, - 1 * @era_constructor_pad, max(@end_date)) AS cohort_end_date
+    person_id subject_id,
+	min(drug_exposure_start_date) AS cohort_start_date,
+	DATEADD(day, - 1 * @era_constructor_pad, max(drug_exposure_end_date)) AS cohort_end_date
   FROM (
-  	SELECT @person_id,
-  		@start_date,
-  		@end_date,
+	SELECT person_id,
+		drug_exposure_start_date,
+		drug_exposure_end_date,
   		sum(is_start) OVER (
-  			PARTITION BY @person_id ORDER BY @start_date,
+			PARTITION BY person_id ORDER BY drug_exposure_start_date,
   				is_start DESC rows unbounded preceding
   			) group_idx
   	FROM (
-  		SELECT @person_id,
-  			@start_date,
-  			@end_date,
+		SELECT person_id,
+			drug_exposure_start_date,
+			drug_exposure_end_date,
   			CASE 
-  				WHEN max(@end_date) OVER (
-  						PARTITION BY @person_id ORDER BY @start_date rows BETWEEN unbounded preceding
+				WHEN max(drug_exposure_end_date) OVER (
+						PARTITION BY person_id ORDER BY drug_exposure_start_date rows BETWEEN unbounded preceding
   								AND 1 preceding
-  						) >= @start_date
+						) >= drug_exposure_start_date
   					THEN 0
   				ELSE 1
   				END is_start
   		FROM (
-  			SELECT @person_id,
-  				@start_date,
-  				DATEADD(day, @era_constructor_pad, @end_date) AS @end_date
+			SELECT person_id,
+				drug_exposure_start_date,
+				DATEADD(day, @era_constructor_pad, drug_exposure_end_date) AS drug_exposure_end_date
   			FROM @source_table
   			) CR
   		) ST
   	) GR
-  GROUP BY @person_id,
+  GROUP BY person_id,
   	group_idx
 ) f
 INNER JOIN
@@ -51,4 +51,3 @@ ON f.subject_id = op.person_id
   AND f.cohort_start_date >= op.observation_period_start_date
   AND f.cohort_start_date <= op.observation_period_end_date
 ;
-
