@@ -8,7 +8,6 @@ runFeatureExtraction(
   connectionDetails = NULL,
   connection = NULL,
   cdmDatabaseSchema,
-  vocabularyDatabaseSchema = cdmDatabaseSchema,
   cohortDatabaseSchema,
   cohortIds,
   cohortTable,
