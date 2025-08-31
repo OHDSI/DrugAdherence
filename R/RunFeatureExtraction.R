@@ -4,6 +4,7 @@
 #' This function executes feature extraction
 #'
 #' @template ConnectionDetails
+#' @template Connection
 #' @template CdmDatabaseSchema
 #' @template cohortDatabaseSchema
 #' @template TempEmulationSchema
