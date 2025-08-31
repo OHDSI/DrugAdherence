@@ -107,7 +107,7 @@ runDrugAdherence <- function(connectionDetails = NULL,
       baseCohortDefinitionId = 100
     ) |>
     dplyr::tibble() |>
-    dplyr::mutate(cohortName = paste0("Numerator - ", .data$cohortName))
+    dplyr::mutate(cohortName = paste0("Numerator - ", cohortName))
 
   writeLines("Downloading....")
   output$person <- DatabaseConnector::renderTranslateQuerySql(
@@ -348,21 +348,21 @@ runDrugAdherence <- function(connectionDetails = NULL,
   DrugAdherenceCohort1 <- output$DrugAdherence |>
     dplyr::mutate(cohortDefinitionId = 1) |>
     dplyr::rename(
-      subjectId = .data$personId,
-      cohortStartDate = .data$drugExposureStartDate,
-      cohortEndDate = .data$drugExposureEndDate
+      subjectId = "personId",
+      cohortStartDate = "drugExposureStartDate",
+      cohortEndDate = "drugExposureEndDate"
     ) |>
     dplyr::select(
-      .data$cohortDefinitionId,
-      .data$subjectId,
-      .data$cohortStartDate,
-      .data$cohortEndDate
+      "cohortDefinitionId",
+      "subjectId",
+      "cohortStartDate",
+      "cohortEndDate"
     ) |>
     dplyr::arrange(
-      .data$cohortDefinitionId,
-      .data$subjectId,
-      .data$cohortStartDate,
-      .data$cohortEndDate
+      "cohortDefinitionId",
+      "subjectId",
+      "cohortStartDate",
+      "cohortEndDate"
     )
 
   ## drug exposure cohort 2----
@@ -372,21 +372,21 @@ runDrugAdherence <- function(connectionDetails = NULL,
       DrugAdherenceEndDate = .data$drugExposureStartDate + .data$daysSupply
     ) |>
     dplyr::rename(
-      subjectId = .data$personId,
-      cohortStartDate = .data$drugExposureStartDate,
-      cohortEndDate = .data$DrugAdherenceEndDate
+      subjectId = "personId",
+      cohortStartDate = "drugExposureStartDate",
+      cohortEndDate = "DrugAdherenceEndDate"
     ) |>
     dplyr::select(
-      .data$cohortDefinitionId,
-      .data$subjectId,
-      .data$cohortStartDate,
-      .data$cohortEndDate
+      "cohortDefinitionId",
+      "subjectId",
+      "cohortStartDate",
+      "cohortEndDate"
     ) |>
     dplyr::arrange(
-      .data$cohortDefinitionId,
-      .data$subjectId,
-      .data$cohortStartDate,
-      .data$cohortEndDate
+      "cohortDefinitionId",
+      "subjectId",
+      "cohortStartDate",
+      "cohortEndDate"
     )
 
   DrugAdherenceCohort <- dplyr::bind_rows(
@@ -430,9 +430,9 @@ runDrugAdherence <- function(connectionDetails = NULL,
     output$cohortDefinitionSet,
     output$cohortDefinitionSet |>
       dplyr::mutate(
-        cohortId = (1000 + .data$cohortId),
+        cohortId = (1000 + cohortId),
         cohortName = paste0(
-          .data$cohortName,
+          cohortName,
           " earliest event"
         )
       ),
@@ -474,18 +474,18 @@ runDrugAdherence <- function(connectionDetails = NULL,
 
   ## cohort days ----
   output$cohortDays <- output$cohorts |>
-    dplyr::group_by(.data$cohortDefinitionId) |>
+    dplyr::group_by(cohortDefinitionId) |>
     dplyr::summarize(
-      persons = n_distinct(.data$subjectId),
+      persons = n_distinct(subjectId),
       events = n(),
-      days = as.double(sum(.data$cohortEndDate - .data$cohortStartDate + 1))
+      days = as.double(sum(cohortEndDate - cohortStartDate + 1))
     ) |>
-    dplyr::rename(cohortId = .data$cohortDefinitionId) |>
+    dplyr::rename(cohortId = cohortDefinitionId) |>
     dplyr::inner_join(
       output$cohortDefinitionSet |>
         dplyr::select(
-          .data$cohortId,
-          .data$cohortName
+          cohortId,
+          cohortName
         ),
       by = "cohortId"
     )
@@ -520,69 +520,69 @@ runDrugAdherence <- function(connectionDetails = NULL,
 
   # Cartesian product of distinct cohort_definition_id and months
   combis <- output$cohortDefinitionSet |>
-    dplyr::select(.data$cohortId) |>
-    dplyr::rename(cohortDefinitionId = .data$cohortId) |>
+    dplyr::select(cohortId) |>
+    dplyr::rename(cohortDefinitionId = cohortId) |>
     dplyr::distinct() |>
-    tidyr::expand(.data$cohortDefinitionId, thresholdDays)
+    tidyr::expand(cohortDefinitionId, thresholdDays)
 
   # Summing days and calculating floor of months
   output$drugPersistenceProportion <-
     output$cohorts |>
-    dplyr::mutate(days = as.integer(.data$cohortEndDate - .data$cohortStartDate + 1)) |>
-    dplyr::group_by(.data$cohortDefinitionId, .data$subjectId) |>
+    dplyr::mutate(days = as.integer(cohortEndDate - cohortStartDate + 1)) |>
+    dplyr::group_by(cohortDefinitionId, subjectId) |>
     dplyr::summarise(
-      sumDays = sum(.data$days),
+      sumDays = sum(days),
       .groups = "drop"
     ) |>
     dplyr::ungroup() |>
-    dplyr::mutate(sumDays = dplyr::if_else(condition = .data$sumDays > maxFollowUpDays,
+    dplyr::mutate(sumDays = dplyr::if_else(condition = sumDays > maxFollowUpDays,
       true = maxFollowUpDays,
-      false = .data$sumDays
+      false = sumDays
     )) |>
     dplyr::inner_join(combis,
       by = "cohortDefinitionId", relationship = "many-to-many"
     ) |>
-    dplyr::filter(thresholdDays <= .data$sumDays) |>
-    dplyr::group_by(.data$cohortDefinitionId, .data$thresholdDays) |>
+    dplyr::filter(thresholdDays <= sumDays) |>
+    dplyr::group_by(cohortDefinitionId, thresholdDays) |>
     dplyr::summarise(
-      personWithPersistentExposure = dplyr::n_distinct(.data$subjectId),
+      personWithPersistentExposure = dplyr::n_distinct(subjectId),
       .groups = "drop"
     ) |>
     dplyr::ungroup() |>
     dplyr::left_join(
       output$cohorts |>
-        dplyr::group_by(.data$cohortDefinitionId) |>
-        dplyr::summarise(totalPersons = dplyr::n_distinct(.data$subjectId)),
+        dplyr::group_by(cohortDefinitionId) |>
+        dplyr::summarise(totalPersons = dplyr::n_distinct(subjectId)),
       by = "cohortDefinitionId"
     ) |>
-    dplyr::mutate(persistenceProportion = .data$personWithPersistentExposure / .data$totalPersons) |>
+    dplyr::mutate(persistenceProportion = personWithPersistentExposure / totalPersons) |>
     dplyr::select(
-      .data$cohortDefinitionId,
-      .data$thresholdDays,
-      .data$personWithPersistentExposure,
-      .data$persistenceProportion
+      cohortDefinitionId,
+      thresholdDays,
+      personWithPersistentExposure,
+      persistenceProportion
     ) |>
-    dplyr::rename(cohortId = .data$cohortDefinitionId) |>
+    dplyr::rename(cohortId = cohortDefinitionId) |>
     dplyr::inner_join(
       output$cohortDefinitionSet |>
         dplyr::select(
-          .data$cohortId,
-          .data$cohortName
+          cohortId,
+          cohortName
         ),
       by = "cohortId"
     ) |>
     dplyr::mutate(cohortNameCohortId = gsub(
       pattern = "-",
       replacement = "\n",
-      x = .data$cohortName
+      x = cohortName
     )) |>
     dplyr::relocate(
-      .data$cohortId,
-      .data$cohortName
+      cohortId,
+      cohortName
     ) |>
     dplyr::arrange(
-      .data$cohortId,
-      .data$cohortName
+      cohortId,
+      cohortName
     )
 
   output$drugPersistenceProportionGraph <-
@@ -590,7 +590,7 @@ runDrugAdherence <- function(connectionDetails = NULL,
       data = output$drugPersistenceProportion,
       ggplot2::aes(
         x = thresholdDays,
-        y = .data$persistenceProportion
+        y = persistenceProportion
       )
     ) +
     ggplot2::geom_line() + # Use geom_line to connect points
@@ -604,40 +604,40 @@ runDrugAdherence <- function(connectionDetails = NULL,
 
   drugAdherenceDays <- output$cohorts |>
     dplyr::group_by(
-      .data$cohortDefinitionId,
-      .data$subjectId
+      cohortDefinitionId,
+      subjectId
     ) |>
-    dplyr::summarise(days = sum(.data$cohortEndDate - .data$cohortStartDate + 1) |> as.double(), .groups = "drop") |>
+    dplyr::summarise(days = sum(cohortEndDate - cohortStartDate + 1) |> as.double(), .groups = "drop") |>
     dplyr::ungroup() |>
     dplyr::select(
-      .data$cohortDefinitionId,
-      .data$days
+      cohortDefinitionId,
+      days
     ) |>
     dplyr::inner_join(
       output$cohortDefinitionSet |>
         dplyr::select(
-          .data$cohortId,
-          .data$cohortName
+          cohortId,
+          cohortName
         ) |>
-        dplyr::rename(cohortDefinitionId = .data$cohortId),
+        dplyr::rename(cohortDefinitionId = cohortId),
       by = "cohortDefinitionId"
     )
 
   output$drugAdherence <- drugAdherenceDays |>
     calculateSummaryStatistics(value = "days", group = "cohortDefinitionId") |>
-    dplyr::rename(cohortDefinitionId = .data$group)
+    dplyr::rename(cohortDefinitionId = group)
 
   output$drugAdherenceRightCensored <- drugAdherenceDays |>
     dplyr::mutate(days = dplyr::if_else(
-      condition = .data$days > maxFollowUpDays,
+      condition = days > maxFollowUpDays,
       true = maxFollowUpDays,
-      false = .data$days
+      false = days
     )) |>
     calculateSummaryStatistics(
       value = "days",
       group = "cohortDefinitionId"
     ) |>
-    dplyr::rename(cohortDefinitionId = .data$group)
+    dplyr::rename(cohortDefinitionId = group)
 
   output$drugAherencePlot <-
     createViolinPlot(
@@ -651,9 +651,9 @@ runDrugAdherence <- function(connectionDetails = NULL,
       data = drugAdherenceDays |>
         dplyr::mutate(
           days = dplyr::if_else(
-            condition = .data$days > maxFollowUpDays,
+            condition = days > maxFollowUpDays,
             true = maxFollowUpDays,
-            false = .data$days
+            false = days
           )
         ),
       xName = "cohortName",

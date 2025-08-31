@@ -73,19 +73,19 @@ processTimeSeries <-
       } else if (timeRep == "Month") {
         processedData <- df |>
           dplyr::mutate(timeGroup = tsibble::yearmonth(dateField)) |>
-          dplyr::select(.data$timeGroup, .data$weight)
+          dplyr::select("timeGroup", "weight")
       } else if (timeRep == "Quarter") {
         processedData <- df |>
           dplyr::mutate(timeGroup = tsibble::yearquarter(dateField)) |>
-          dplyr::select(.data$timeGroup, .data$weight)
+          dplyr::select("timeGroup", "weight")
       } else if (timeRep == "Week") {
         processedData <- df |>
           dplyr::mutate(timeGroup = tsibble::yearweek(dateField)) |>
-          dplyr::select(.data$timeGroup, .data$weight)
+          dplyr::select("timeGroup", "weight")
       } else if (timeRep == "Year") {
         processedData <- df |>
           dplyr::mutate(timeGroup = format(dateField, "%Y") |> as.integer()) |>
-          dplyr::select(.data$timeGroup, .data$weight)
+          dplyr::select("timeGroup", "weight")
       }
 
       processedData <- processedData |>
