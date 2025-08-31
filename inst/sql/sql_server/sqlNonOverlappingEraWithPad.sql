@@ -10,39 +10,39 @@ SELECT {@cohort_definition_id_not_null} ? {CAST(@cohort_definition_id AS BIGINT)
   INTO @output_table
 FROM
 (
-  SELECT 
-    @person_id subject_id,
-  	min(@start_date) AS cohort_start_date,
-  	DATEADD(day, - 1 * @era_constructor_pad, max(@end_date)) AS cohort_end_date
+  SELECT
+    @person_id_col subject_id,
+	min(@start_date_col) AS cohort_start_date,
+	DATEADD(day, - 1 * @era_constructor_pad, max(era_end_date)) AS cohort_end_date
   FROM (
-  	SELECT @person_id,
-  		@start_date,
-  		@end_date,
+	SELECT @person_id_col,
+		@start_date_col,
+		era_end_date,
   		sum(is_start) OVER (
-  			PARTITION BY @person_id ORDER BY @start_date,
+			PARTITION BY @person_id_col ORDER BY @start_date_col,
   				is_start DESC rows unbounded preceding
   			) group_idx
   	FROM (
-  		SELECT @person_id,
-  			@start_date,
-  			@end_date,
-  			CASE 
-  				WHEN max(@end_date) OVER (
-  						PARTITION BY @person_id ORDER BY @start_date rows BETWEEN unbounded preceding
+		SELECT @person_id_col,
+			@start_date_col,
+			era_end_date,
+			CASE
+				WHEN max(era_end_date) OVER (
+						PARTITION BY @person_id_col ORDER BY @start_date_col rows BETWEEN unbounded preceding
   								AND 1 preceding
-  						) >= @start_date
+						) >= @start_date_col
   					THEN 0
   				ELSE 1
   				END is_start
   		FROM (
-  			SELECT @person_id,
-  				@start_date,
-  				DATEADD(day, @era_constructor_pad, @end_date) AS @end_date
+			SELECT @person_id_col,
+				@start_date_col,
+				DATEADD(day, @era_constructor_pad, @end_date_col) AS era_end_date
   			FROM @source_table
   			) CR
   		) ST
   	) GR
-  GROUP BY @person_id,
+  GROUP BY @person_id_col,
   	group_idx
 ) f
 INNER JOIN
