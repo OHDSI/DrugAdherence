@@ -53,15 +53,15 @@ jobs:
       CDM5_SPARK_CONNECTION_STRING: ${{ secrets.CDM5_SPARK_CONNECTION_STRING }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@v2.2.0
         with:
           r-version: ${{ matrix.config.r }}
 
-      - uses: r-lib/actions/setup-tinytex@v2
+      - uses: r-lib/actions/setup-tinytex@v2.2.0
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-pandoc@v2.2.0
 
       - name: Install system requirements
         if: runner.os == 'Linux'
@@ -73,12 +73,12 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2.2.0
         with:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - uses: r-lib/actions/check-r-package@v2
+      - uses: r-lib/actions/check-r-package@v2.2.0
         with:
           args: 'c("--no-manual", "--as-cran")'
           error-on: '"warning"'
@@ -86,7 +86,7 @@ jobs:
 
       - name: Upload source package
         if: success() && runner.os == 'macOS' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: package_tarball
           path: check/*.tar.gz
@@ -114,7 +114,7 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -129,7 +129,7 @@ jobs:
 
       - name: Create release
         if: ${{ env.new_version != '' }}
-        uses: actions/create-release@v1
+        uses: actions/create-release@v1.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
@@ -140,7 +140,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@v2.2.0
         if: ${{ env.new_version != '' }}
 
       - name: Install drat
@@ -156,7 +156,7 @@ jobs:
 
       - name: Download package tarball
         if: ${{ env.new_version != '' }}
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: package_tarball
 
