@@ -24,6 +24,12 @@ unlink("extras/DrugAdherence.pdf")
 shell("R CMD Rd2pdf ./ --output=extras/DrugAdherence.pdf")
 
 # Create Vignettes---------------------------------------------------------
+dir.create(file.path("inst","doc"), showWarnings = FALSE)
+rmarkdown::render("vignettes/CalculationsInDrugAdherence.Rmd",
+                  output_file = "../inst/doc/CalculationsInDrugAdherence.pdf",
+                  rmarkdown::pdf_document(latex_engine = "pdflatex",
+                                          toc = TRUE,
+                                          number_sections = TRUE))
 
 # Build site---------------------------------------------------------
 pkgdown::build_site()
