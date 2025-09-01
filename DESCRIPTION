@@ -31,9 +31,11 @@ Suggests:
   Eunomia,
   remotes,
   rmarkdown,
+  knitr,
   RJSONIO,
 	testthat,
 	withr
+VignetteBuilder: knitr
 Remotes:
   CirceR
 License: Apache License (== 2.0)
