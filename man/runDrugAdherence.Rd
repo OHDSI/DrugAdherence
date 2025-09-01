@@ -64,10 +64,10 @@ tables, provide a schema with write privileges where temp tables can be created.
 }
 \description{
 This function takes as a input a Circe compatible concept set expression (as r list object that
-can be converted to json), a denominator cohort or a set of rules to create the denominator
-cohort, and checks for occurrence of drug exposure events in the drug_exposure table of
-the CDM for the conceptId in the given concept expression in the period and for the subjects in
+can be converted to json), a denominator cohort, and checks for occurrence of drug exposure
+events in the drug_exposure table of the CDM for the conceptId's in the resolved set of the
+given concept expression in the period and for the subjects in
 the denominator cohort. It then computes a series of drug utilization
-metrics (adherence, persistence, utilization, patterns)
+metrics (adherence, persistence, utilization patterns)
 and reports returns a list of objects that maybe utilized in a drug exposure report.
 }
