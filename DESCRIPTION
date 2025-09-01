@@ -36,7 +36,7 @@ Suggests:
 	withr
 Remotes:
   CirceR
-License: Apache License (== 2.0) + file LICENSE
+License: Apache License (== 2.0)
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
