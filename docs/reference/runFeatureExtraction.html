@@ -81,6 +81,14 @@ DatabaseConnector package. Can be left NULL if <code>connection</code> is
 provided.</p></dd>
 
 
+<dt id="arg-connection">connection<a class="anchor" aria-label="anchor" href="#arg-connection"></a></dt>
+<dd><p>An object of type <code>connection</code> as created using the
+<code><a href="https://ohdsi.github.io/DatabaseConnector/reference/connect.html" class="external-link">connect</a></code> function in the
+DatabaseConnector package. Can be left NULL if <code>connectionDetails</code>
+is provided, in which case a new connection will be opened at the start
+of the function, and closed when the function finishes.</p></dd>
+
+
 <dt id="arg-cdmdatabaseschema">cdmDatabaseSchema<a class="anchor" aria-label="anchor" href="#arg-cdmdatabaseschema"></a></dt>
 <dd><p>Schema name where your patient-level data in OMOP CDM format resides.
 Note that for SQL Server, this should include both the database and
